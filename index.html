@@ -321,6 +321,7 @@
             aspect-ratio: 4/5;
             overflow: hidden;
             border-radius: 4px;
+            cursor: pointer;
         }
 
         .gallery-item.large {
@@ -563,6 +564,85 @@
         .toast.show {
             transform: translateX(-50%) translateY(0);
             opacity: 1;
+        }
+
+        /* Image Modal */
+        .image-modal {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .image-modal.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90vh;
+            border-radius: 8px;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            object-fit: contain;
+        }
+
+        .image-modal.show .modal-content {
+            transform: scale(1);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 35px;
+            font-weight: 300;
+            cursor: pointer;
+            z-index: 2001;
+            transition: color 0.2s;
+        }
+
+        .close-modal:hover {
+            color: #ffffff;
+        }
+
+        .modal-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 40px;
+            font-weight: 300;
+            cursor: pointer;
+            padding: 15px;
+            user-select: none;
+            z-index: 2002;
+            transition: color 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .modal-nav:hover {
+            color: #ffffff;
+        }
+
+        .modal-nav.prev {
+            left: 10px;
+        }
+
+        .modal-nav.next {
+            right: 10px;
         }
     </style>
 </head>
@@ -811,15 +891,23 @@
 
         <!-- Footer -->
         <footer>
-            <button class="kakao-share-btn">
+            <!-- <button class="kakao-share-btn">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                     <path
                         d="M12 3C5.373 3 0 7.42 0 12.875c0 3.513 2.217 6.611 5.617 8.441-.184.629-.668 2.308-.716 2.531-.06.273.104.269.215.195.086-.057 2.766-1.848 3.86-2.585C10.027 21.84 11 22 12 22c6.627 0 12-4.42 12-9.125S18.627 3 12 3z" />
                 </svg>
                 카카오톡으로 공유하기
-            </button>
+            </button> -->
             <div>© 2026 Inkee & Hyejin. All rights reserved.</div>
         </footer>
+
+        <!-- Image Modal -->
+        <div id="imageModal" class="image-modal" onclick="handleModalClick(event)" ontouchstart="handleTouchStart(event)" ontouchend="handleTouchEnd(event)">
+            <span class="close-modal">&times;</span>
+            <div class="modal-nav prev" onclick="changeImage(-1, event)">&#10094;</div>
+            <img id="modalImage" class="modal-content" src="" onclick="event.stopPropagation()">
+            <div class="modal-nav next" onclick="changeImage(1, event)">&#10095;</div>
+        </div>
 
         <!-- Toast -->
         <div id="toast" class="toast">계좌번호가 복사되었습니다.</div>
@@ -911,6 +999,63 @@
             }, 2500);
         }
 
+        // Image Modal Logic
+        let currentImageIndex = 0;
+        let galleryImages = [];
+        let touchstartX = 0;
+        let touchendX = 0;
+        let isSwiping = false;
+
+        function openImageModal(index) {
+            currentImageIndex = index;
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modalImg.src = galleryImages[currentImageIndex];
+            modal.classList.add('show');
+        }
+
+        function closeImageModal() {
+            const modal = document.getElementById('imageModal');
+            modal.classList.remove('show');
+        }
+
+        function changeImage(direction, event) {
+            if (event) event.stopPropagation();
+            currentImageIndex += direction;
+            if (currentImageIndex < 0) currentImageIndex = galleryImages.length - 1;
+            if (currentImageIndex >= galleryImages.length) currentImageIndex = 0;
+            
+            const modalImg = document.getElementById('modalImage');
+            modalImg.src = galleryImages[currentImageIndex];
+        }
+
+        function handleTouchStart(event) {
+            touchstartX = event.changedTouches[0].screenX;
+            isSwiping = false;
+        }
+
+        function handleTouchEnd(event) {
+            touchendX = event.changedTouches[0].screenX;
+            if (Math.abs(touchendX - touchstartX) > 50) {
+                isSwiping = true;
+                if (touchendX < touchstartX - 50) {
+                    changeImage(1, event); // Swipe left
+                } else {
+                    changeImage(-1, event); // Swipe right
+                }
+            }
+        }
+
+        function handleModalClick(event) {
+            if (isSwiping) {
+                isSwiping = false;
+                return;
+            }
+            if (event.target.id === 'imageModal' || event.target.classList.contains('close-modal')) {
+                closeImageModal();
+            }
+        }
+
         // D-Day Calculator
         function calculateDDay() {
             const weddingDate = new Date('2026-08-08T13:00:00+09:00');
@@ -936,6 +1081,19 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             calculateDDay();
+
+            // Initialize Gallery Images
+            const items = document.querySelectorAll('.gallery-item');
+            items.forEach((item, index) => {
+                const img = item.querySelector('img');
+                if (img) {
+                    galleryImages.push(img.src);
+                    item.onclick = (e) => {
+                        e.preventDefault();
+                        openImageModal(index);
+                    };
+                }
+            });
 
             // Initial trigger for elements already in viewport
             setTimeout(() => {
