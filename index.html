@@ -10,8 +10,7 @@
     <meta name="description" content="저희 두 사람의 소중한 시작을 함께해 주세요.">
     <meta property="og:title" content="이인기 & 안혜진 결혼합니다">
     <meta property="og:description" content="2026년 8월 8일 토요일 오후 1시">
-    <meta property="og:image"
-        content="./image/main_cover.png">
+    <meta property="og:image" content="./image/main_cover.jpg">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -106,8 +105,8 @@
             bottom: 0;
             left: 0;
             right: 0;
-            height: 60%;
-            background: linear-gradient(to top, rgba(253, 252, 249, 1) 0%, rgba(253, 252, 249, 0.7) 30%, rgba(253, 252, 249, 0) 100%);
+            height: 70%;
+            background: linear-gradient(to top, rgba(253, 252, 249, 1) 0%, rgba(253, 252, 249, 0.8) 40%, rgba(253, 252, 249, 0) 100%);
         }
 
         .cover-img {
@@ -132,42 +131,59 @@
             z-index: 2;
             text-align: center;
             margin-top: auto;
-            padding-bottom: 10vh;
+            padding-bottom: 12vh;
+            width: 100%;
         }
 
-        .cover-date {
-            font-size: 1.1rem;
-            letter-spacing: 2px;
+        .cover-subtitle {
+            font-family: 'Pretendard', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 400;
+            letter-spacing: 6px;
             color: var(--secondary-color);
             margin-bottom: 20px;
-            background-color: rgba(255, 255, 255, 0.55);
-            padding: 6px 20px;
-            border-radius: 30px;
-            display: inline-block;
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
+            text-transform: uppercase;
         }
 
         .cover-names {
-            font-size: 2.2rem;
-            font-weight: 400;
-            margin-bottom: 15px;
+            font-size: 2.6rem;
+            font-weight: 300;
             color: var(--text-main);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 15px;
+            gap: 16px;
+            margin-bottom: 30px;
         }
 
-        .cover-names span {
-            font-size: 1rem;
-            color: var(--accent-color);
+        .cover-names .and {
+            font-size: 1.6rem;
+            color: var(--secondary-color);
+            font-style: italic;
+            font-family: 'Times New Roman', Times, serif;
+            font-weight: 300;
+            transform: translateY(2px);
+        }
+
+        .cover-divider {
+            width: 1px;
+            height: 40px;
+            background-color: var(--accent-color);
+            margin: 0 auto 20px;
+        }
+
+        .cover-date {
+            font-size: 1.1rem;
+            letter-spacing: 4px;
+            color: var(--text-main);
+            margin-bottom: 12px;
         }
 
         .cover-location {
             font-size: 0.95rem;
             color: var(--text-light);
             font-family: 'Pretendard', sans-serif;
+            letter-spacing: 1px;
         }
 
         /* Section Styles */
@@ -326,21 +342,40 @@
         /* Location Section */
         .map-container {
             width: 100%;
-            height: 250px;
-            background-color: #e9e9e9;
-            margin: 30px 0;
+            margin: 30px 0 15px 0;
             border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-light);
-            position: relative;
             overflow: hidden;
+            border: 1px solid var(--border-color);
         }
 
-        .map-container::after {
-            content: '지도 영역입니다 (API 연동 필요)';
-            position: absolute;
+        .map-container img {
+            width: 100%;
+            display: block;
+            height: auto;
+        }
+
+        .map-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .map-buttons button {
+            flex: 1;
+            padding: 12px 0;
+            border: 1px solid var(--border-color);
+            background-color: white;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            color: var(--text-main);
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-family: 'Pretendard', sans-serif;
+        }
+
+        .map-buttons button:hover {
+            background-color: #f5f5f5;
         }
 
         .location-info {
@@ -539,14 +574,17 @@
         <!-- Cover Section -->
         <header class="cover">
             <div class="cover-img-wrapper">
-                <img src="./image/main_cover.png"
-                    alt="Wedding Couple" class="cover-img">
+                <img src="./image/main_cover.jpg" alt="Wedding Couple" class="cover-img">
             </div>
-            <div style="z-index: 2;"></div> <!-- Spacer -->
             <div class="cover-content fade-up">
+                <div class="cover-names serif">
+                    <span>이인기</span>
+                    <span class="and">&amp;</span>
+                    <span>안혜진</span>
+                </div>
                 <div class="cover-date serif">2026. 08. 08. SAT</div>
-                <div class="cover-names serif">이인기 <span>그리고</span> 안혜진</div>
                 <div class="cover-location">오후 1시, aT포레웨딩홀</div>
+                <p class="cover-subtitle">WE ARE GETTING MARRIED</p>
             </div>
         </header>
 
@@ -660,16 +698,13 @@
             <h2 class="section-title fade-up">Gallery</h2>
             <div class="gallery-grid fade-up">
                 <div class="gallery-item">
-                    <img src="./image/gallery_1.png"
-                        alt="Gallery Image 1">
+                    <img src="./image/gallery_1.jpg" alt="Gallery Image 1">
                 </div>
                 <div class="gallery-item">
-                    <img src="./image/gallery_2.png"
-                        alt="Gallery Image 2">
+                    <img src="./image/gallery_2.jpg" alt="Gallery Image 2">
                 </div>
                 <div class="gallery-item large">
-                    <img src="./image/main_cover.png"
-                        alt="Gallery Image 3">
+                    <img src="./image/main_cover.jpg" alt="Gallery Image 3">
                 </div>
             </div>
         </section>
@@ -682,7 +717,11 @@
                 <div class="location-address">서울 서초구 강남대로 27</div>
             </div>
             <div class="map-container fade-up">
-                <!-- Interactive map would be embedded here -->
+                <img src="./image/sketch_map.jpeg" alt="오시는 길 약도">
+            </div>
+            <div class="map-buttons fade-up">
+                <button type="button" onclick="openKakaoApp()">카카오맵으로 보기</button>
+                <button type="button" onclick="openNaverApp()">네이버 지도로 보기</button>
             </div>
             <div class="transport-info fade-up">
                 <div class="transport-item">
@@ -811,6 +850,47 @@
         function toggleAccordion(element) {
             const item = element.parentElement;
             item.classList.toggle('active');
+        }
+
+        // 📍 예식장 정보 세팅
+        const WEDDING_LAT = 37.468316; // 위도
+        const WEDDING_LNG = 127.039206; // 경도
+        const WEDDING_NAME = "aT포레웨딩홀";
+        const NAVER_PLACE_ID = "11534903"; // 네이버 지도 고유 장소 ID
+
+        // 🟡 카카오맵 앱 호출
+        function openKakaoApp() {
+            const scheme = `kakaomap://look?p=${WEDDING_LAT},${WEDDING_LNG}`;
+            const fallback = `https://map.kakao.com/link/map/${WEDDING_NAME},${WEDDING_LAT},${WEDDING_LNG}`;
+
+            executeAppOrFallback(scheme, fallback);
+        }
+
+        // 🟢 네이버 지도 앱 호출
+        function openNaverApp() {
+            const scheme = `nmap://place?lat=${WEDDING_LAT}&lng=${WEDDING_LNG}&name=${WEDDING_NAME}`;
+            const fallback = `https://map.naver.com/v5/entry/place/${NAVER_PLACE_ID}`;
+
+            executeAppOrFallback(scheme, fallback);
+        }
+
+        // ⚙️ 공통 실행 및 폴백 함수 (가장 중요)
+        function executeAppOrFallback(schemeUrl, fallbackUrl) {
+            const clickedAt = +new Date();
+
+            // 1. 먼저 앱 URL Scheme을 호출합니다.
+            window.location.href = schemeUrl;
+
+            // 2. 1.5초 뒤에 동작할 타이머를 설정합니다.
+            setTimeout(() => {
+                const now = +new Date();
+                // 1.5초가 지났는데도 현재 시간과 클릭 시간의 차이가 2초(2000ms) 미만이라면,
+                // 기기가 앱으로 전환되지 않고 현재 웹페이지에 머물러 있는 것으로 간주합니다.
+                if (now - clickedAt < 2000) {
+                    // 앱이 없다고 판단하고 웹 브라우저 지도로 이동시킵니다.
+                    window.location.href = fallbackUrl;
+                }
+            }, 1500);
         }
 
         // Copy to Clipboard
