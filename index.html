@@ -112,19 +112,19 @@
 
         .cover-img {
             width: 100%;
-            height: 100%;
+            height: 110%;
             object-fit: cover;
-            transform: scale(1.05);
+            transform: translateY(-10%);
             animation: slowZoom 20s infinite alternate;
         }
 
         @keyframes slowZoom {
             from {
-                transform: scale(1);
+                transform: translateY(-10%) scale(1);
             }
 
             to {
-                transform: scale(1.1);
+                transform: translateY(-10%) scale(1.1);
             }
         }
 
@@ -193,7 +193,7 @@
             line-height: 1.1;
             color: #fff;
             margin-bottom: 20px;
-            text-shadow: 0 2px 15px rgba(0, 0, 0, 0.4);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
             font-style: italic;
         }
 
