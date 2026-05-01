@@ -403,6 +403,16 @@
             cursor: pointer;
             transition: background-color 0.2s;
             font-family: 'Pretendard', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .map-icon {
+            width: 18px;
+            height: 18px;
+            object-fit: contain;
         }
 
         .map-buttons button:hover {
@@ -868,8 +878,18 @@
                 <img src="./image/sketch_map.jpeg" alt="오시는 길 약도">
             </div>
             <div class="map-buttons fade-up">
-                <button type="button" onclick="openKakaoApp()">카카오맵으로 보기</button>
-                <button type="button" onclick="openNaverApp()">네이버 지도로 보기</button>
+                <button type="button" onclick="openKakaoApp()">
+                    <img src="https://w.theirmood.com/src/img/card/ico_nav01.png" alt="카카오맵" class="map-icon">
+                    카카오맵
+                </button>
+                <button type="button" onclick="openTmapApp()">
+                    <img src="https://w.theirmood.com/src/img/card/ico_nav02.png" alt="티맵" class="map-icon">
+                    티맵
+                </button>
+                <button type="button" onclick="openNaverApp()">
+                    <img src="https://w.theirmood.com/src/img/card/ico_nav03.png" alt="네이버지도" class="map-icon">
+                    네이버지도
+                </button>
             </div>
             <div class="transport-info fade-up">
                 <div class="transport-item">
@@ -1043,6 +1063,14 @@
         function openNaverApp() {
             const scheme = `nmap://place?lat=${WEDDING_LAT}&lng=${WEDDING_LNG}&name=${WEDDING_NAME}`;
             const fallback = `https://map.naver.com/v5/entry/place/${NAVER_PLACE_ID}`;
+
+            executeAppOrFallback(scheme, fallback);
+        }
+
+        // 🔵 티맵 앱 호출
+        function openTmapApp() {
+            const scheme = `tmap://route?goalname=${encodeURIComponent(WEDDING_NAME)}&goalx=${WEDDING_LNG}&goaly=${WEDDING_LAT}`;
+            const fallback = `https://surl.tmap.co.kr/r/route?goalname=${encodeURIComponent(WEDDING_NAME)}&goalx=${WEDDING_LNG}&goaly=${WEDDING_LAT}`;
 
             executeAppOrFallback(scheme, fallback);
         }
