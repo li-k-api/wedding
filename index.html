@@ -436,30 +436,90 @@
         }
 
         .transport-info {
-            margin-top: 25px;
+            margin: 40px 30px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+            text-align: left;
         }
 
         .transport-item {
-            margin-bottom: 15px;
+            position: relative;
+            padding-left: 48px;
+        }
+
+        .transport-icon {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 34px;
+            height: 34px;
+            background-color: #f8f7f5;
+            border-radius: 10px;
             display: flex;
-            align-items: flex-start;
-            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            color: var(--secondary-color);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
         }
 
         .transport-label {
-            background-color: var(--secondary-color);
-            color: white;
-            font-size: 0.8rem;
-            padding: 4px 10px;
-            border-radius: 20px;
-            white-space: nowrap;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--secondary-color);
+            margin-bottom: 6px;
+            display: block;
+            letter-spacing: 0.5px;
         }
 
         .transport-desc {
-            font-size: 0.95rem;
-            color: var(--text-main);
-            line-height: 1.5;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            line-height: 1.65;
         }
+
+        .transport-desc strong {
+            color: var(--text-main);
+            font-weight: 600;
+            display: block;
+            margin-bottom: 4px;
+            font-size: 0.95rem;
+        }
+
+        .bus-group {
+            margin-bottom: 15px;
+        }
+
+        .bus-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .bus-stop {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 4px;
+            display: block;
+            background-color: #f0f0f0;
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .bus-numbers {
+            display: block;
+            margin-top: 4px;
+        }
+
+        .bus-type {
+            font-weight: 600;
+            margin-right: 4px;
+        }
+
+        .bus-type.green { color: #2e7d32; }
+        .bus-type.blue { color: #1565c0; }
+        .bus-type.red { color: #c62828; }
+
 
         /* Account Section */
         .account-section {
@@ -891,20 +951,54 @@
             </div>
             <div class="transport-info fade-up">
                 <div class="transport-item">
-                    <div class="transport-label">지하철</div>
+                    <div class="transport-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="5" width="10" height="14" rx="2" ry="2"></rect><path d="M7 15h10"></path><path d="M12 15v4"></path><path d="M8 19l-2 2"></path><path d="M16 19l2 2"></path></svg>
+                    </div>
+                    <span class="transport-label">지하철</span>
                     <div class="transport-desc">
-                        <strong>신분당선 양재시민의숲(매헌역)</strong><br>
-                        4번 출구 / 지하통로 바로 연결
+                        <strong>신분당선 양재시민의숲역(매헌) 하차</strong>
+                        지상 4번출구 이용 / 지하 내부 통로 연결 가능<br>
+                        2호선 강남역 · 3호선 양재역 환승 가능
                     </div>
                 </div>
+
                 <div class="transport-item">
-                    <div class="transport-label">주차</div>
+                    <div class="transport-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h20"/><path d="M2 18h20"/><rect width="20" height="12" x="2" y="6" rx="2"/><path d="m4 18 1 1.5"/><path d="m20 18-1 1.5"/></svg>
+                    </div>
+                    <span class="transport-label">버스</span>
                     <div class="transport-desc">
-                        aT센터 지하 주차장 이용<br>
-                        (하객 무료 주차 지원)
+                        <div class="bus-group">
+                            <span class="bus-stop">"AT센터 · 양재꽃시장" 하차</span>
+                            <div class="bus-numbers">
+                                <span class="bus-type green">지선</span> 0411, 4432<br>
+                                <span class="bus-type blue">간선</span> 140, 400, 405, 421, 440, 441, 452, 470, 741<br>
+                                <span class="bus-type">경기</span> 11-3, 917
+                            </div>
+                        </div>
+                        <div class="bus-group">
+                            <span class="bus-stop">"시민의숲 · 양재꽃시장" 하차</span>
+                            <div class="bus-numbers">
+                                <span class="bus-type red">광역</span> 9404, 9408, 9409, 9711, 9100, 9200, 9201, 9300, 9500, 9501, 9802, M6405, M6450, 3002, 3007, 3008, 5001, 5002B<br>
+                                <span class="bus-type">마을</span> 서초 20 (양재역)
+                            </div>
+                        </div>
                     </div>
                 </div>
+
+                <div class="transport-item">
+                    <div class="transport-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2l.64-2.54c.24-.959.24-1.962 0-2.92l-1.07-4.27A3 3 0 0 0 17.66 5H6.34a3 3 0 0 0-2.91 2.27l-1.07 4.27c-.24.958-.24 1.961 0 2.92L3 17h2"></path><path d="M14 17H10"></path><circle cx="7" cy="17" r="2"></circle><circle cx="17" cy="17" r="2"></circle></svg>
+                    </div>
+                    <span class="transport-label">자가용</span>
+                    <div class="transport-desc">
+                        <strong>네비게이션 : "AT센터" 검색</strong>
+                        경부고속도로 양재 IC 진출 후 염곡사거리에서 좌회전 → U턴 (꽃시장 옆)
+                    </div>
+                </div>
+
             </div>
+
         </section>
 
         <!-- Account Section -->
