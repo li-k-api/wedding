@@ -1276,6 +1276,37 @@
         let isMusicPlaying = false;
         let userHasInteracted = false;
 
+        // A list of user gestures that browsers allow for media playback activation
+        const userActivationEvents = ['click', 'touchstart', 'touchend', 'mousedown', 'keydown'];
+
+        // Function that runs on first valid user interaction
+        function handleUserActivation() {
+            if (!userHasInteracted) {
+                userHasInteracted = true;
+                
+                // If player is loaded and not already playing, play it now
+                if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
+                    if (!isMusicPlaying) {
+                        ytPlayer.playVideo();
+                    }
+                }
+                
+                // Clean up listeners
+                cleanupActivationListeners();
+            }
+        }
+
+        // Add listeners immediately on script execution to catch early interactions
+        userActivationEvents.forEach(eventName => {
+            document.addEventListener(eventName, handleUserActivation, { passive: true });
+        });
+
+        function cleanupActivationListeners() {
+            userActivationEvents.forEach(eventName => {
+                document.removeEventListener(eventName, handleUserActivation);
+            });
+        }
+
         // 1. Asynchronously load YouTube IFrame API
         const tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
@@ -1309,28 +1340,11 @@
 
         // 3. Play Music once player is ready (handling browser interaction block)
         function onPlayerReady(event) {
-            // Attempt playback immediately
-            event.target.playVideo();
-
-            // Set up a listener for first interaction to activate audio playback if blocked
-            const autoPlayOnInteraction = () => {
-                if (!userHasInteracted) {
-                    userHasInteracted = true;
-                    if (!isMusicPlaying && ytPlayer && typeof ytPlayer.playVideo === 'function') {
-                        ytPlayer.playVideo();
-                    }
-                    cleanupInteractionListeners();
-                }
-            };
-
-            document.addEventListener('click', autoPlayOnInteraction);
-            document.addEventListener('touchstart', autoPlayOnInteraction);
-            document.addEventListener('scroll', autoPlayOnInteraction);
-            
-            function cleanupInteractionListeners() {
-                document.removeEventListener('click', autoPlayOnInteraction);
-                document.removeEventListener('touchstart', autoPlayOnInteraction);
-                document.removeEventListener('scroll', autoPlayOnInteraction);
+            // Attempt autoplay if user has already interacted, otherwise try anyway
+            if (userHasInteracted) {
+                event.target.playVideo();
+            } else {
+                event.target.playVideo();
             }
         }
 
@@ -1349,6 +1363,8 @@
         // 5. Explicitly Toggle Music Play/Pause
         function toggleMusic() {
             userHasInteracted = true; // Mark as interacted when they directly click the button
+            cleanupActivationListeners(); // Stop listening to global gestures since user managed it manually
+            
             if (!ytPlayer || typeof ytPlayer.playVideo !== 'function') return;
 
             if (isMusicPlaying) {
