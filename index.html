@@ -802,10 +802,10 @@
         /* Floating Music Button styling */
         .music-btn {
             position: fixed;
-            top: 20px;
-            right: calc(50% - 240px + 20px);
-            width: 36px;
-            height: 36px;
+            top: 12px;
+            right: calc(50% - 240px + 12px);
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             background-color: rgba(255, 255, 255, 0.3);
             /* 더 부드러운 글래스모피즘 배경 */
@@ -837,7 +837,8 @@
 
         @media (max-width: 480px) {
             .music-btn {
-                right: 20px;
+                top: 12px;
+                right: 12px;
             }
         }
 
@@ -846,13 +847,13 @@
             display: none;
             align-items: flex-end;
             justify-content: center;
-            gap: 3px;
-            width: 18px;
-            height: 18px;
+            gap: 2px;
+            width: 14px;
+            height: 14px;
         }
 
         .music-wave-bar {
-            width: 2px;
+            width: 1.5px;
             height: 100%;
             background-color: var(--secondary-color);
             border-radius: 1px;
@@ -893,8 +894,8 @@
         /* Static Note Icon when Paused */
         .music-btn .icon-note {
             display: block;
-            width: 20px;
-            height: 20px;
+            width: 14px;
+            height: 14px;
             color: var(--secondary-color);
             transition: transform 0.3s ease;
         }
