@@ -708,6 +708,7 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s ease;
+            touch-action: none; /* Prevent background page scrolling on mobile */
         }
 
         .image-modal.show {
@@ -720,13 +721,13 @@
             height: 100%;
             max-width: 100%;
             max-height: 100%;
-            transform: scale(0.95);
-            transition: transform 0.3s ease;
+            transform: translate3d(0px, 0px, 0px) scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.15, 0.85, 0.35, 1);
             object-fit: contain;
-        }
-
-        .image-modal.show .modal-content {
-            transform: scale(1);
+            will-change: transform;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
         }
 
         .close-modal {
@@ -1137,8 +1138,7 @@
         </footer>
 
         <!-- Image Modal -->
-        <div id="imageModal" class="image-modal" onclick="handleModalClick(event)"
-            ontouchstart="handleTouchStart(event)" ontouchend="handleTouchEnd(event)">
+        <div id="imageModal" class="image-modal" onclick="handleModalClick(event)">
             <div class="close-modal" onclick="closeImageModal()">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
                     stroke-linecap="round" stroke-linejoin="round">
@@ -1267,16 +1267,55 @@
         // Image Modal Logic
         let currentImageIndex = 0;
         let galleryImages = [];
+
+        // Zoom & Pan State variables
+        let scale = 1;
+        let translateX = 0;
+        let translateY = 0;
+        
+        // Touch tracking variables
+        let lastTapTime = 0;
         let touchstartX = 0;
-        let touchendX = 0;
-        let isSwiping = false;
+        let touchstartY = 0;
+        let isPanning = false;
+        let isPinching = false;
+        
+        // For panning tracking
+        let panStartX = 0;
+        let panStartY = 0;
+        let initialTranslateX = 0;
+        let initialTranslateY = 0;
+        
+        // For pinching tracking
+        let initialPinchDist = 0;
+        let initialScale = 1;
+        let pinchCenterX = 0;
+        let pinchCenterY = 0;
 
         function updateModalImage() {
             const modalImg = document.getElementById('modalImage');
             const modalCounter = document.getElementById('modalCounter');
 
-            modalImg.src = galleryImages[currentImageIndex];
-            modalCounter.innerText = `${currentImageIndex + 1} / ${galleryImages.length}`;
+            if (modalImg) {
+                modalImg.src = galleryImages[currentImageIndex];
+            }
+            if (modalCounter) {
+                modalCounter.innerText = `${currentImageIndex + 1} / ${galleryImages.length}`;
+            }
+            
+            // Reset zoom & pan when image changes
+            resetZoom();
+        }
+
+        function resetZoom() {
+            scale = 1;
+            translateX = 0;
+            translateY = 0;
+            const modalImg = document.getElementById('modalImage');
+            if (modalImg) {
+                modalImg.style.transition = 'transform 0.3s cubic-bezier(0.15, 0.85, 0.35, 1)';
+                modalImg.style.transform = 'translate3d(0px, 0px, 0px) scale(1)';
+            }
         }
 
         function openImageModal(index) {
@@ -1285,12 +1324,25 @@
             updateModalImage();
             modal.classList.add('show');
             document.body.style.overflow = 'hidden'; // Prevent scrolling
+            
+            // Trigger beautiful zoom entry
+            const modalImg = document.getElementById('modalImage');
+            if (modalImg) {
+                modalImg.style.transition = 'none';
+                modalImg.style.transform = 'translate3d(0px, 0px, 0px) scale(0.95)';
+                // Force layout reflow
+                modalImg.offsetHeight;
+                modalImg.style.transition = 'transform 0.3s cubic-bezier(0.15, 0.85, 0.35, 1)';
+                modalImg.style.transform = 'translate3d(0px, 0px, 0px) scale(1)';
+            }
         }
 
         function closeImageModal() {
             const modal = document.getElementById('imageModal');
             modal.classList.remove('show');
             document.body.style.overflow = ''; // Restore scrolling
+            // Reset scale/translate smoothly
+            setTimeout(resetZoom, 300);
         }
 
         function changeImage(direction, event) {
@@ -1302,31 +1354,191 @@
             updateModalImage();
         }
 
-        function handleTouchStart(event) {
-            touchstartX = event.changedTouches[0].screenX;
-            isSwiping = false;
-        }
-
-        function handleTouchEnd(event) {
-            touchendX = event.changedTouches[0].screenX;
-            if (Math.abs(touchendX - touchstartX) > 50) {
-                isSwiping = true;
-                if (touchendX < touchstartX - 50) {
-                    changeImage(1, event); // Swipe left
-                } else {
-                    changeImage(-1, event); // Swipe right
-                }
-            }
-        }
-
         function handleModalClick(event) {
-            if (isSwiping) {
-                isSwiping = false;
-                return;
-            }
             // Close if clicking the background (imageModal itself)
             if (event.target.id === 'imageModal') {
                 closeImageModal();
+            }
+        }
+
+        // Setup Gesture Listeners
+        function setupModalGestures() {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            if (!modal || !modalImg) return;
+
+            // Touch start
+            modal.addEventListener('touchstart', (e) => {
+                // If touching interactive buttons/controls, allow them to function normally
+                if (e.target.closest('.close-modal') || e.target.closest('.modal-footer') || e.target.closest('.modal-nav')) {
+                    return;
+                }
+                
+                if (e.touches.length === 1) {
+                    // Single touch: setup for swipe or pan
+                    const touch = e.touches[0];
+                    touchstartX = touch.clientX;
+                    touchstartY = touch.clientY;
+                    
+                    if (scale > 1) {
+                        isPanning = true;
+                        panStartX = touch.clientX;
+                        panStartY = touch.clientY;
+                        initialTranslateX = translateX;
+                        initialTranslateY = translateY;
+                        modalImg.style.transition = 'none'; // Snappy drag response
+                    } else {
+                        isPanning = false;
+                    }
+                    isPinching = false;
+                } else if (e.touches.length === 2) {
+                    // Two touches: setup for pinch-to-zoom
+                    isPinching = true;
+                    isPanning = false;
+                    
+                    const t1 = e.touches[0];
+                    const t2 = e.touches[1];
+                    
+                    initialPinchDist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+                    initialScale = scale;
+                    
+                    pinchCenterX = (t1.clientX + t2.clientX) / 2;
+                    pinchCenterY = (t1.clientY + t2.clientY) / 2;
+                    
+                    modalImg.style.transition = 'none'; // Snappy pinch response
+                }
+            }, { passive: false });
+
+            // Touch move
+            modal.addEventListener('touchmove', (e) => {
+                if (e.target.closest('.close-modal') || e.target.closest('.modal-footer') || e.target.closest('.modal-nav')) {
+                    return;
+                }
+                
+                // Prevent background scrolling / bouncing when interacting with the active modal image
+                if (scale > 1 || e.touches.length > 1) {
+                    if (e.cancelable) e.preventDefault();
+                }
+
+                if (isPanning && e.touches.length === 1) {
+                    const touch = e.touches[0];
+                    const dx = touch.clientX - panStartX;
+                    const dy = touch.clientY - panStartY;
+                    
+                    translateX = initialTranslateX + dx;
+                    translateY = initialTranslateY + dy;
+                    
+                    clampBoundaries();
+                    modalImg.style.transform = `translate3d(${translateX}px, ${translateY}px, 0px) scale(${scale})`;
+                } else if (isPinching && e.touches.length === 2) {
+                    if (e.cancelable) e.preventDefault();
+                    
+                    const t1 = e.touches[0];
+                    const t2 = e.touches[1];
+                    
+                    const currentDist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+                    if (initialPinchDist === 0) return;
+                    
+                    const newScale = Math.min(Math.max(initialScale * (currentDist / initialPinchDist), 1), 4);
+                    
+                    // Zoom centered dynamically on the user's pinch midpoint
+                    const newPinchCenterX = (t1.clientX + t2.clientX) / 2;
+                    const newPinchCenterY = (t1.clientY + t2.clientY) / 2;
+                    
+                    translateX = newPinchCenterX - (newPinchCenterX - translateX) * (newScale / scale);
+                    translateY = newPinchCenterY - (newPinchCenterY - translateY) * (newScale / scale);
+                    scale = newScale;
+                    
+                    clampBoundaries();
+                    modalImg.style.transform = `translate3d(${translateX}px, ${translateY}px, 0px) scale(${scale})`;
+                }
+            }, { passive: false });
+
+            // Touch end
+            modal.addEventListener('touchend', (e) => {
+                if (e.target.closest('.close-modal') || e.target.closest('.modal-footer') || e.target.closest('.modal-nav')) {
+                    return;
+                }
+                
+                // Horizontal swipe change (only allowed when scale is 1)
+                if (scale === 1 && !isPinching && e.changedTouches.length === 1) {
+                    const touchendX = e.changedTouches[0].clientX;
+                    const touchendY = e.changedTouches[0].clientY;
+                    const dx = touchendX - touchstartX;
+                    const dy = touchendY - touchstartY;
+                    
+                    if (Math.abs(dx) > 50 && Math.abs(dy) < 100) {
+                        if (dx < 0) {
+                            changeImage(1); // Next
+                        } else {
+                            changeImage(-1); // Prev
+                        }
+                    }
+                }
+                
+                // Double tap gesture detection
+                if (e.touches.length === 0 && !isPinching) {
+                    const now = Date.now();
+                    if (now - lastTapTime < 300) {
+                        const touch = e.changedTouches[0];
+                        handleDoubleTap(touch.clientX, touch.clientY);
+                        lastTapTime = 0;
+                        return;
+                    }
+                    lastTapTime = now;
+                }
+                
+                // Smooth transition to normal panning when one finger is lifted during pinch
+                if (e.touches.length === 1 && scale > 1) {
+                    isPinching = false;
+                    isPanning = true;
+                    const touch = e.touches[0];
+                    panStartX = touch.clientX;
+                    panStartY = touch.clientY;
+                    initialTranslateX = translateX;
+                    initialTranslateY = translateY;
+                }
+                
+                // Reset gesture state when all fingers are lifted
+                if (e.touches.length === 0) {
+                    isPanning = false;
+                    isPinching = false;
+                    
+                    if (scale < 1.05) {
+                        resetZoom();
+                    } else {
+                        // Return smoothly from temporary invalid bounds
+                        modalImg.style.transition = 'transform 0.3s cubic-bezier(0.15, 0.85, 0.35, 1)';
+                        clampBoundaries();
+                        modalImg.style.transform = `translate3d(${translateX}px, ${translateY}px, 0px) scale(${scale})`;
+                    }
+                }
+            });
+
+            function clampBoundaries() {
+                const maxTx = (window.innerWidth * (scale - 1)) / 2;
+                const maxTy = (window.innerHeight * (scale - 1)) / 2;
+                
+                translateX = Math.min(Math.max(translateX, -maxTx), maxTx);
+                translateY = Math.min(Math.max(translateY, -maxTy), maxTy);
+            }
+
+            function handleDoubleTap(clientX, clientY) {
+                modalImg.style.transition = 'transform 0.3s cubic-bezier(0.15, 0.85, 0.35, 1)';
+                if (scale > 1.1) {
+                    resetZoom();
+                } else {
+                    const targetScale = 2.5;
+                    const centerX = window.innerWidth / 2;
+                    const centerY = window.innerHeight / 2;
+                    
+                    translateX = (centerX - clientX) * (targetScale - 1);
+                    translateY = (centerY - clientY) * (targetScale - 1);
+                    scale = targetScale;
+                    
+                    clampBoundaries();
+                    modalImg.style.transform = `translate3d(${translateX}px, ${translateY}px, 0px) scale(${scale})`;
+                }
             }
         }
 
@@ -1355,6 +1567,7 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             calculateDDay();
+            setupModalGestures();
 
             // Initialize Gallery Images
             const items = document.querySelectorAll('.gallery-item');
