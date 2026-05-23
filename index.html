@@ -1374,6 +1374,11 @@
                     return;
                 }
                 
+                // Prevent browser default behaviors like page wiggles / scrolls when zooming
+                if (scale > 1 || e.touches.length > 1) {
+                    if (e.cancelable) e.preventDefault();
+                }
+                
                 if (e.touches.length === 1) {
                     // Single touch: setup for swipe or pan
                     const touch = e.touches[0];
@@ -1404,6 +1409,9 @@
                     
                     pinchCenterX = (t1.clientX + t2.clientX) / 2;
                     pinchCenterY = (t1.clientY + t2.clientY) / 2;
+                    
+                    initialTranslateX = translateX;
+                    initialTranslateY = translateY;
                     
                     modalImg.style.transition = 'none'; // Snappy pinch response
                 }
@@ -1445,8 +1453,9 @@
                     const newPinchCenterX = (t1.clientX + t2.clientX) / 2;
                     const newPinchCenterY = (t1.clientY + t2.clientY) / 2;
                     
-                    translateX = newPinchCenterX - (newPinchCenterX - translateX) * (newScale / scale);
-                    translateY = newPinchCenterY - (newPinchCenterY - translateY) * (newScale / scale);
+                    // Extremely stable non-compounding formula anchoring on original touch positions
+                    translateX = newPinchCenterX - (pinchCenterX - initialTranslateX) * (newScale / initialScale);
+                    translateY = newPinchCenterY - (pinchCenterY - initialTranslateY) * (newScale / initialScale);
                     scale = newScale;
                     
                     clampBoundaries();
@@ -1458,6 +1467,11 @@
             modal.addEventListener('touchend', (e) => {
                 if (e.target.closest('.close-modal') || e.target.closest('.modal-footer') || e.target.closest('.modal-nav')) {
                     return;
+                }
+                
+                // Prevent browser click/touch simulated delay or zoom when interacting with zoomed image
+                if (scale > 1 || isPinching || isPanning || e.touches.length > 0) {
+                    if (e.cancelable) e.preventDefault();
                 }
                 
                 // Horizontal swipe change (only allowed when scale is 1)
@@ -1480,6 +1494,7 @@
                 if (e.touches.length === 0 && !isPinching) {
                     const now = Date.now();
                     if (now - lastTapTime < 300) {
+                        if (e.cancelable) e.preventDefault(); // Stop mobile browser default page zoom!
                         const touch = e.changedTouches[0];
                         handleDoubleTap(touch.clientX, touch.clientY);
                         lastTapTime = 0;
@@ -1516,8 +1531,10 @@
             });
 
             function clampBoundaries() {
-                const maxTx = (window.innerWidth * (scale - 1)) / 2;
-                const maxTy = (window.innerHeight * (scale - 1)) / 2;
+                const viewW = document.documentElement.clientWidth;
+                const viewH = document.documentElement.clientHeight;
+                const maxTx = (viewW * (scale - 1)) / 2;
+                const maxTy = (viewH * (scale - 1)) / 2;
                 
                 translateX = Math.min(Math.max(translateX, -maxTx), maxTx);
                 translateY = Math.min(Math.max(translateY, -maxTy), maxTy);
@@ -1529,8 +1546,10 @@
                     resetZoom();
                 } else {
                     const targetScale = 2.5;
-                    const centerX = window.innerWidth / 2;
-                    const centerY = window.innerHeight / 2;
+                    const viewW = document.documentElement.clientWidth;
+                    const viewH = document.documentElement.clientHeight;
+                    const centerX = viewW / 2;
+                    const centerY = viewH / 2;
                     
                     translateX = (centerX - clientX) * (targetScale - 1);
                     translateY = (centerY - clientY) * (targetScale - 1);
