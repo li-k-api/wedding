@@ -804,14 +804,16 @@
             position: fixed;
             top: 20px;
             right: calc(50% - 240px + 20px);
-            width: 44px;
-            height: 44px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.82);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            background-color: rgba(255, 255, 255, 0.3);
+            /* 더 부드러운 글래스모피즘 배경 */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            /* 더 은은한 그림자 */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -819,6 +821,14 @@
             z-index: 1000;
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             padding: 0;
+            opacity: 0.65;
+            /* 평소에는 연하게 보이도록 투명도 설정 */
+        }
+
+        .music-btn:hover {
+            opacity: 1;
+            /* 마우스 오버 시 선명하게 */
+            background-color: rgba(255, 255, 255, 0.8);
         }
 
         .music-btn:active {
@@ -850,14 +860,34 @@
             animation: bounceEqualizer 1.2s ease-in-out infinite alternate;
         }
 
-        .music-wave-bar:nth-child(1) { animation-delay: 0.1s; height: 35%; }
-        .music-wave-bar:nth-child(2) { animation-delay: 0.4s; height: 80%; }
-        .music-wave-bar:nth-child(3) { animation-delay: 0.2s; height: 50%; }
-        .music-wave-bar:nth-child(4) { animation-delay: 0.6s; height: 100%; }
+        .music-wave-bar:nth-child(1) {
+            animation-delay: 0.1s;
+            height: 35%;
+        }
+
+        .music-wave-bar:nth-child(2) {
+            animation-delay: 0.4s;
+            height: 80%;
+        }
+
+        .music-wave-bar:nth-child(3) {
+            animation-delay: 0.2s;
+            height: 50%;
+        }
+
+        .music-wave-bar:nth-child(4) {
+            animation-delay: 0.6s;
+            height: 100%;
+        }
 
         @keyframes bounceEqualizer {
-            0% { transform: scaleY(0.2); }
-            100% { transform: scaleY(1.1); }
+            0% {
+                transform: scaleY(0.2);
+            }
+
+            100% {
+                transform: scaleY(1.1);
+            }
         }
 
         /* Static Note Icon when Paused */
@@ -887,7 +917,8 @@
         <!-- Floating Music Toggle Button -->
         <button id="musicBtn" class="music-btn" onclick="toggleMusic()" aria-label="배경음악 토글">
             <!-- Static Note Icon -->
-            <svg class="icon-note" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg class="icon-note" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
                 <path d="M9 18V5l12-2v13"></path>
                 <circle cx="6" cy="18" r="3"></circle>
                 <circle cx="18" cy="16" r="3"></circle>
@@ -902,7 +933,9 @@
         </button>
 
         <!-- Hidden YouTube Player Div -->
-        <div id="yt-player" style="position: absolute; width: 1px; height: 1px; left: -9999px; top: -9999px; opacity: 0; pointer-events: none;"></div>
+        <div id="yt-player"
+            style="position: absolute; width: 1px; height: 1px; left: -9999px; top: -9999px; opacity: 0; pointer-events: none;">
+        </div>
 
         <!-- Cover Section -->
         <header class="cover">
@@ -1283,14 +1316,14 @@
         function handleUserActivation() {
             if (!userHasInteracted) {
                 userHasInteracted = true;
-                
+
                 // If player is loaded and not already playing, play it now
                 if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
                     if (!isMusicPlaying) {
                         ytPlayer.playVideo();
                     }
                 }
-                
+
                 // Clean up listeners
                 cleanupActivationListeners();
             }
@@ -1346,6 +1379,12 @@
             } else {
                 event.target.playVideo();
             }
+
+            // 접속이 끝나고 플레이어 로드가 완료되면 음악 재생 버튼을 프로그램적으로 클릭 시도
+            const musicBtn = document.getElementById('musicBtn');
+            if (musicBtn && !isMusicPlaying) {
+                musicBtn.click();
+            }
         }
 
         // 4. Update play/pause toggle button depending on actual player state
@@ -1364,7 +1403,7 @@
         function toggleMusic() {
             userHasInteracted = true; // Mark as interacted when they directly click the button
             cleanupActivationListeners(); // Stop listening to global gestures since user managed it manually
-            
+
             if (!ytPlayer || typeof ytPlayer.playVideo !== 'function') return;
 
             if (isMusicPlaying) {
