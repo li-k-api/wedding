@@ -438,7 +438,7 @@
         }
 
         .location-info {
-            text-align: left;
+            text-align: center;
         }
 
         .location-name {
@@ -708,7 +708,8 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s ease;
-            touch-action: none; /* Prevent background page scrolling on mobile */
+            touch-action: none;
+            /* Prevent background page scrolling on mobile */
         }
 
         .image-modal.show {
@@ -956,7 +957,7 @@
         <section>
             <h2 class="section-title fade-up">Location</h2>
             <div class="location-info fade-up">
-                <div class="location-name serif">aT포레웨딩홀</div>
+                <div class="location-name serif">aT포레웨딩홀 5층 그랜드홀</div>
                 <div class="location-address">서울 서초구 강남대로 27</div>
             </div>
             <div class="map-container fade-up">
@@ -1272,20 +1273,20 @@
         let scale = 1;
         let translateX = 0;
         let translateY = 0;
-        
+
         // Touch tracking variables
         let lastTapTime = 0;
         let touchstartX = 0;
         let touchstartY = 0;
         let isPanning = false;
         let isPinching = false;
-        
+
         // For panning tracking
         let panStartX = 0;
         let panStartY = 0;
         let initialTranslateX = 0;
         let initialTranslateY = 0;
-        
+
         // For pinching tracking
         let initialPinchDist = 0;
         let initialScale = 1;
@@ -1302,7 +1303,7 @@
             if (modalCounter) {
                 modalCounter.innerText = `${currentImageIndex + 1} / ${galleryImages.length}`;
             }
-            
+
             // Reset zoom & pan when image changes
             resetZoom();
         }
@@ -1324,7 +1325,7 @@
             updateModalImage();
             modal.classList.add('show');
             document.body.style.overflow = 'hidden'; // Prevent scrolling
-            
+
             // Trigger beautiful zoom entry
             const modalImg = document.getElementById('modalImage');
             if (modalImg) {
@@ -1373,18 +1374,18 @@
                 if (e.target.closest('.close-modal') || e.target.closest('.modal-footer') || e.target.closest('.modal-nav')) {
                     return;
                 }
-                
+
                 // Prevent browser default behaviors like page wiggles / scrolls when zooming
                 if (scale > 1 || e.touches.length > 1) {
                     if (e.cancelable) e.preventDefault();
                 }
-                
+
                 if (e.touches.length === 1) {
                     // Single touch: setup for swipe or pan
                     const touch = e.touches[0];
                     touchstartX = touch.clientX;
                     touchstartY = touch.clientY;
-                    
+
                     if (scale > 1) {
                         isPanning = true;
                         panStartX = touch.clientX;
@@ -1400,19 +1401,19 @@
                     // Two touches: setup for pinch-to-zoom
                     isPinching = true;
                     isPanning = false;
-                    
+
                     const t1 = e.touches[0];
                     const t2 = e.touches[1];
-                    
+
                     initialPinchDist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
                     initialScale = scale;
-                    
+
                     pinchCenterX = (t1.clientX + t2.clientX) / 2;
                     pinchCenterY = (t1.clientY + t2.clientY) / 2;
-                    
+
                     initialTranslateX = translateX;
                     initialTranslateY = translateY;
-                    
+
                     modalImg.style.transition = 'none'; // Snappy pinch response
                 }
             }, { passive: false });
@@ -1422,7 +1423,7 @@
                 if (e.target.closest('.close-modal') || e.target.closest('.modal-footer') || e.target.closest('.modal-nav')) {
                     return;
                 }
-                
+
                 // Prevent background scrolling / bouncing when interacting with the active modal image
                 if (scale > 1 || e.touches.length > 1) {
                     if (e.cancelable) e.preventDefault();
@@ -1432,32 +1433,32 @@
                     const touch = e.touches[0];
                     const dx = touch.clientX - panStartX;
                     const dy = touch.clientY - panStartY;
-                    
+
                     translateX = initialTranslateX + dx;
                     translateY = initialTranslateY + dy;
-                    
+
                     clampBoundaries();
                     modalImg.style.transform = `translate3d(${translateX}px, ${translateY}px, 0px) scale(${scale})`;
                 } else if (isPinching && e.touches.length === 2) {
                     if (e.cancelable) e.preventDefault();
-                    
+
                     const t1 = e.touches[0];
                     const t2 = e.touches[1];
-                    
+
                     const currentDist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
                     if (initialPinchDist === 0) return;
-                    
+
                     const newScale = Math.min(Math.max(initialScale * (currentDist / initialPinchDist), 1), 4);
-                    
+
                     // Zoom centered dynamically on the user's pinch midpoint
                     const newPinchCenterX = (t1.clientX + t2.clientX) / 2;
                     const newPinchCenterY = (t1.clientY + t2.clientY) / 2;
-                    
+
                     // Extremely stable non-compounding formula anchoring on original touch positions
                     translateX = newPinchCenterX - (pinchCenterX - initialTranslateX) * (newScale / initialScale);
                     translateY = newPinchCenterY - (pinchCenterY - initialTranslateY) * (newScale / initialScale);
                     scale = newScale;
-                    
+
                     clampBoundaries();
                     modalImg.style.transform = `translate3d(${translateX}px, ${translateY}px, 0px) scale(${scale})`;
                 }
@@ -1468,19 +1469,19 @@
                 if (e.target.closest('.close-modal') || e.target.closest('.modal-footer') || e.target.closest('.modal-nav')) {
                     return;
                 }
-                
+
                 // Prevent browser click/touch simulated delay or zoom when interacting with zoomed image
                 if (scale > 1 || isPinching || isPanning || e.touches.length > 0) {
                     if (e.cancelable) e.preventDefault();
                 }
-                
+
                 // Horizontal swipe change (only allowed when scale is 1)
                 if (scale === 1 && !isPinching && e.changedTouches.length === 1) {
                     const touchendX = e.changedTouches[0].clientX;
                     const touchendY = e.changedTouches[0].clientY;
                     const dx = touchendX - touchstartX;
                     const dy = touchendY - touchstartY;
-                    
+
                     if (Math.abs(dx) > 50 && Math.abs(dy) < 100) {
                         if (dx < 0) {
                             changeImage(1); // Next
@@ -1489,7 +1490,7 @@
                         }
                     }
                 }
-                
+
                 // Double tap gesture detection
                 if (e.touches.length === 0 && !isPinching) {
                     const now = Date.now();
@@ -1502,7 +1503,7 @@
                     }
                     lastTapTime = now;
                 }
-                
+
                 // Smooth transition to normal panning when one finger is lifted during pinch
                 if (e.touches.length === 1 && scale > 1) {
                     isPinching = false;
@@ -1513,12 +1514,12 @@
                     initialTranslateX = translateX;
                     initialTranslateY = translateY;
                 }
-                
+
                 // Reset gesture state when all fingers are lifted
                 if (e.touches.length === 0) {
                     isPanning = false;
                     isPinching = false;
-                    
+
                     if (scale < 1.05) {
                         resetZoom();
                     } else {
@@ -1535,7 +1536,7 @@
                 const viewH = document.documentElement.clientHeight;
                 const maxTx = (viewW * (scale - 1)) / 2;
                 const maxTy = (viewH * (scale - 1)) / 2;
-                
+
                 translateX = Math.min(Math.max(translateX, -maxTx), maxTx);
                 translateY = Math.min(Math.max(translateY, -maxTy), maxTy);
             }
@@ -1550,11 +1551,11 @@
                     const viewH = document.documentElement.clientHeight;
                     const centerX = viewW / 2;
                     const centerY = viewH / 2;
-                    
+
                     translateX = (centerX - clientX) * (targetScale - 1);
                     translateY = (centerY - clientY) * (targetScale - 1);
                     scale = targetScale;
-                    
+
                     clampBoundaries();
                     modalImg.style.transform = `translate3d(${translateX}px, ${translateY}px, 0px) scale(${scale})`;
                 }
