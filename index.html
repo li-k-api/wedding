@@ -1324,31 +1324,43 @@
         let userHasInteracted = false;
         let playerReady = false;
 
-        // A list of user gestures that browsers allow for media playback activation
-        const userActivationEvents = ['click', 'touchstart', 'touchend', 'touchmove', 'mousedown', 'keydown', 'scroll'];
+        // 모바일 브라우저(특히 Android Chrome)에서 미디어 재생 활성화 제스처로 인정하는 이벤트 목록
+        // scroll, touchmove, touchend는 크롬 정책상 재생 권한을 주지 않으므로 제외합니다.
+        // 사용자가 스크롤을 하기 위해 화면을 터치하는 순간 touchstart가 발생하므로 자연스러운 재생이 가능합니다.
+        const userActivationEvents = ['click', 'touchstart', 'mousedown', 'keydown'];
 
-        // Function that runs on valid user interaction
+        // 사용자의 상호작용이 감지되었을 때 배경음악 재생을 시도하는 함수
         function handleUserActivation() {
             userHasInteracted = true;
 
-            // If player is loaded and not already playing, play it now
+            // 플레이어가 준비되었고 정상 재생이 가능한 상태라면 실행
             if (playerReady && ytPlayer && typeof ytPlayer.playVideo === 'function') {
                 if (!isMusicPlaying) {
-                    ytPlayer.playVideo();
+                    try {
+                        ytPlayer.playVideo();
+                    } catch (e) {
+                        console.log("Autoplay blocked or player error:", e);
+                    }
                 }
             }
         }
 
-        // Add listeners immediately on script execution to catch early interactions
-        userActivationEvents.forEach(eventName => {
-            document.addEventListener(eventName, handleUserActivation, { passive: true });
-        });
+        // 이벤트 리스너 등록 함수
+        function setupActivationListeners() {
+            userActivationEvents.forEach(eventName => {
+                document.addEventListener(eventName, handleUserActivation, { passive: true });
+            });
+        }
 
+        // 이벤트 리스너 제거 함수
         function cleanupActivationListeners() {
             userActivationEvents.forEach(eventName => {
                 document.removeEventListener(eventName, handleUserActivation);
             });
         }
+
+        // 스크립트 실행 즉시 리스너 설정
+        setupActivationListeners();
 
         // 1. Asynchronously load YouTube IFrame API
         const tag = document.createElement('script');
@@ -1385,12 +1397,20 @@
         function onPlayerReady(event) {
             playerReady = true;
 
-            // Attempt autoplay if user has already interacted, otherwise try anyway
-            event.target.playVideo();
-
-            // 만약 이미 사용자가 스크롤/터치 행동을 했다면 플레이어 준비 후 즉시 재생 시도
+            // 이미 사용자가 터치/클릭 등 상호작용을 한 상태라면 즉시 재생 시도
             if (userHasInteracted && !isMusicPlaying) {
-                event.target.playVideo();
+                try {
+                    event.target.playVideo();
+                } catch (e) {
+                    console.log("Autoplay on player ready blocked:", e);
+                }
+            } else {
+                // 상호작용이 없었더라도 음소거 또는 브라우저 허용 정책에 따라 일단 자동 재생 시도
+                try {
+                    event.target.playVideo();
+                } catch (e) {
+                    // 차단될 경우 사용자의 다음 제스처를 기다림
+                }
             }
         }
 
@@ -1400,7 +1420,7 @@
             if (event.data === YT.PlayerState.PLAYING) {
                 isMusicPlaying = true;
                 musicBtn.classList.add('playing');
-                // 음악 재생이 정상적으로 시작된 이후에만 이벤트 리스너를 정리해 줍니다.
+                // 정상적으로 음악 재생이 시작되었으므로 전역 상호작용 감지 리스너를 완전히 정리합니다.
                 cleanupActivationListeners();
             } else {
                 isMusicPlaying = false;
@@ -1410,8 +1430,8 @@
 
         // 5. Explicitly Toggle Music Play/Pause
         function toggleMusic() {
-            userHasInteracted = true; // Mark as interacted when they directly click the button
-            cleanupActivationListeners(); // Stop listening to global gestures since user managed it manually
+            userHasInteracted = true; // 사용자가 직접 조작했으므로 상호작용 상태 설정
+            cleanupActivationListeners(); // 더 이상 전역 제스처를 감지할 필요가 없으므로 리스너 정리
 
             if (!ytPlayer || typeof ytPlayer.playVideo !== 'function') return;
 
