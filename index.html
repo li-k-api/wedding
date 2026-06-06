@@ -1316,24 +1316,20 @@
         let ytPlayer;
         let isMusicPlaying = false;
         let userHasInteracted = false;
+        let playerReady = false;
 
         // A list of user gestures that browsers allow for media playback activation
-        const userActivationEvents = ['click', 'touchstart', 'touchend', 'mousedown', 'keydown'];
+        const userActivationEvents = ['click', 'touchstart', 'touchend', 'touchmove', 'mousedown', 'keydown', 'scroll'];
 
-        // Function that runs on first valid user interaction
+        // Function that runs on valid user interaction
         function handleUserActivation() {
-            if (!userHasInteracted) {
-                userHasInteracted = true;
+            userHasInteracted = true;
 
-                // If player is loaded and not already playing, play it now
-                if (ytPlayer && typeof ytPlayer.playVideo === 'function') {
-                    if (!isMusicPlaying) {
-                        ytPlayer.playVideo();
-                    }
+            // If player is loaded and not already playing, play it now
+            if (playerReady && ytPlayer && typeof ytPlayer.playVideo === 'function') {
+                if (!isMusicPlaying) {
+                    ytPlayer.playVideo();
                 }
-
-                // Clean up listeners
-                cleanupActivationListeners();
             }
         }
 
@@ -1381,17 +1377,14 @@
 
         // 3. Play Music once player is ready (handling browser interaction block)
         function onPlayerReady(event) {
+            playerReady = true;
+            
             // Attempt autoplay if user has already interacted, otherwise try anyway
-            if (userHasInteracted) {
-                event.target.playVideo();
-            } else {
-                event.target.playVideo();
-            }
+            event.target.playVideo();
 
-            // 접속이 끝나고 플레이어 로드가 완료되면 음악 재생 버튼을 프로그램적으로 클릭 시도
-            const musicBtn = document.getElementById('musicBtn');
-            if (musicBtn && !isMusicPlaying) {
-                musicBtn.click();
+            // 만약 이미 사용자가 스크롤/터치 행동을 했다면 플레이어 준비 후 즉시 재생 시도
+            if (userHasInteracted && !isMusicPlaying) {
+                event.target.playVideo();
             }
         }
 
@@ -1401,6 +1394,8 @@
             if (event.data === YT.PlayerState.PLAYING) {
                 isMusicPlaying = true;
                 musicBtn.classList.add('playing');
+                // 음악 재생이 정상적으로 시작된 이후에만 이벤트 리스너를 정리해 줍니다.
+                cleanupActivationListeners();
             } else {
                 isMusicPlaying = false;
                 musicBtn.classList.remove('playing');
