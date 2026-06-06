@@ -19,6 +19,11 @@
         href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Noto+Serif+KR:wght@300;400;500;600&family=Pretendard:wght@300;400;500;600&display=swap"
         rel="stylesheet">
 
+    <!-- YouTube Player Preconnect & Async Load -->
+    <link rel="preconnect" href="https://www.youtube.com">
+    <link rel="preconnect" href="https://s.ytimg.com">
+    <script src="https://www.youtube.com/iframe_api" async></script>
+
     <style>
         /* CSS Reset & Variables */
         :root {
@@ -1323,6 +1328,7 @@
         let isMusicPlaying = false;
         let userHasInteracted = false;
         let playerReady = false;
+        let apiLoaded = false;
 
         // 모바일 브라우저(특히 Android Chrome)에서 미디어 재생 활성화 제스처로 인정하는 이벤트 목록
         // scroll, touchmove, touchend는 크롬 정책상 재생 권한을 주지 않으므로 제외합니다.
@@ -1335,12 +1341,19 @@
 
             // 플레이어가 준비되었고 정상 재생이 가능한 상태라면 실행
             if (playerReady && ytPlayer && typeof ytPlayer.playVideo === 'function') {
-                if (!isMusicPlaying) {
-                    try {
-                        ytPlayer.playVideo();
-                    } catch (e) {
-                        console.log("Autoplay blocked or player error:", e);
+                try {
+                    ytPlayer.unMute();
+                    ytPlayer.playVideo();
+                    
+                    // 만약 이미 재생 중(음소거된 상태)이었다면 unMute 호출 후 바로 UI 재생 상태 활성화
+                    if (ytPlayer.getPlayerState() === YT.PlayerState.PLAYING) {
+                        isMusicPlaying = true;
+                        const musicBtn = document.getElementById('musicBtn');
+                        if (musicBtn) musicBtn.classList.add('playing');
+                        cleanupActivationListeners();
                     }
+                } catch (e) {
+                    console.log("Unmute/play failed on user activation:", e);
                 }
             }
         }
@@ -1362,54 +1375,70 @@
         // 스크립트 실행 즉시 리스너 설정
         setupActivationListeners();
 
-        // 1. Asynchronously load YouTube IFrame API
-        const tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        const firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-        // 2. Initialize YouTube Player
+        // 1. YouTube IFrame API 로드 완료 시 호출되는 콜백
         function onYouTubeIframeAPIReady() {
-            ytPlayer = new YT.Player('yt-player', {
-                height: '1',
-                width: '1',
-                videoId: 'PWhMoGt0cs8',
-                playerVars: {
-                    'autoplay': 1,
-                    'controls': 0,
-                    'disablekb': 1,
-                    'fs': 0,
-                    'rel': 0,
-                    'modestbranding': 1,
-                    'iv_load_policy': 3,
-                    'loop': 1,
-                    'playlist': 'PWhMoGt0cs8', // Loop requires playlist param to be video ID
-                    'playsinline': 1 // Crucial: prevents iOS from auto-maximizing to fullscreen
-                },
-                events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange
-                }
-            });
+            apiLoaded = true;
+            initPlayerIfReady();
         }
+
+        // DOM 로드 완료와 API 로드 완료 시점이 맞물려 안전하게 플레이어를 초기화하는 함수
+        function initPlayerIfReady() {
+            if (apiLoaded && (document.readyState === 'interactive' || document.readyState === 'complete')) {
+                // DOM 내에 yt-player 엘리먼트가 존재하지 않으면 동적으로 생성하여 본문에 추가 (레이스 컨디션 방지)
+                let playerDiv = document.getElementById('yt-player');
+                if (!playerDiv) {
+                    playerDiv = document.createElement('div');
+                    playerDiv.id = 'yt-player';
+                    playerDiv.style.cssText = "position: absolute; width: 1px; height: 1px; left: -9999px; top: -9999px; opacity: 0; pointer-events: none;";
+                    document.body.appendChild(playerDiv);
+                }
+
+                ytPlayer = new YT.Player('yt-player', {
+                    height: '1',
+                    width: '1',
+                    videoId: 'PWhMoGt0cs8',
+                    playerVars: {
+                        'autoplay': 1,
+                        'mute': 1,        // ★ 중요: 음소거 상태로 시작하여 모바일 브라우저의 자동재생 제한 우회
+                        'controls': 0,
+                        'disablekb': 1,
+                        'fs': 0,
+                        'rel': 0,
+                        'modestbranding': 1,
+                        'iv_load_policy': 3,
+                        'loop': 1,
+                        'playlist': 'PWhMoGt0cs8', // Loop requires playlist param to be video ID
+                        'playsinline': 1 // Crucial: prevents iOS from auto-maximizing to fullscreen
+                    },
+                    events: {
+                        'onReady': onPlayerReady,
+                        'onStateChange': onPlayerStateChange
+                    }
+                });
+            }
+        }
+
+        // DOM 로드 완료 감지 리스너 등록
+        document.addEventListener('DOMContentLoaded', initPlayerIfReady);
 
         // 3. Play Music once player is ready (handling browser interaction block)
         function onPlayerReady(event) {
             playerReady = true;
 
-            // 이미 사용자가 터치/클릭 등 상호작용을 한 상태라면 즉시 재생 시도
-            if (userHasInteracted && !isMusicPlaying) {
+            // 이미 사용자가 터치/클릭 등 상호작용을 한 상태라면 음소거 해제 후 즉시 재생 시도
+            if (userHasInteracted) {
                 try {
+                    event.target.unMute();
                     event.target.playVideo();
                 } catch (e) {
                     console.log("Autoplay on player ready blocked:", e);
                 }
             } else {
-                // 상호작용이 없었더라도 음소거 또는 브라우저 허용 정책에 따라 일단 자동 재생 시도
+                // 상호작용이 없었더라도 일단 음소거 상태로 자동 재생 시도 (버퍼링을 미리 진행하여 딜레이 제거)
                 try {
                     event.target.playVideo();
                 } catch (e) {
-                    // 차단될 경우 사용자의 다음 제스처를 기다림
+                    console.log("Muted autoplay blocked:", e);
                 }
             }
         }
@@ -1418,10 +1447,15 @@
         function onPlayerStateChange(event) {
             const musicBtn = document.getElementById('musicBtn');
             if (event.data === YT.PlayerState.PLAYING) {
-                isMusicPlaying = true;
-                musicBtn.classList.add('playing');
-                // 정상적으로 음악 재생이 시작되었으므로 전역 상호작용 감지 리스너를 완전히 정리합니다.
-                cleanupActivationListeners();
+                // 음소거 상태가 아닐 때만 실제 음악 재생으로 간주하고 UI 변경 및 리스너 제거
+                if (!ytPlayer.isMuted()) {
+                    isMusicPlaying = true;
+                    musicBtn.classList.add('playing');
+                    cleanupActivationListeners();
+                } else {
+                    isMusicPlaying = false;
+                    musicBtn.classList.remove('playing');
+                }
             } else {
                 isMusicPlaying = false;
                 musicBtn.classList.remove('playing');
@@ -1438,7 +1472,11 @@
             if (isMusicPlaying) {
                 ytPlayer.pauseVideo();
             } else {
+                ytPlayer.unMute(); // 소리 켜기
                 ytPlayer.playVideo();
+                isMusicPlaying = true;
+                const musicBtn = document.getElementById('musicBtn');
+                if (musicBtn) musicBtn.classList.add('playing');
             }
         }
 
