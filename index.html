@@ -370,6 +370,10 @@
             margin-top: 20px;
         }
 
+        .gallery-grid.collapsed .gallery-item:nth-child(n+10) {
+            display: none;
+        }
+
         .gallery-item {
             aspect-ratio: 4/5;
             overflow: hidden;
@@ -391,6 +395,44 @@
 
         .gallery-item:hover img {
             transform: scale(1.05);
+        }
+
+        .gallery-toggle-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .gallery-toggle-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 24px;
+            border: 1px solid var(--border-color);
+            background-color: #ffffff;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Pretendard', sans-serif;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+            outline: none;
+        }
+
+        .gallery-toggle-btn:hover {
+            background-color: #fcfbfa;
+            border-color: var(--secondary-color);
+            color: var(--text-main);
+        }
+
+        .gallery-toggle-btn .toggle-icon {
+            transition: transform 0.3s ease;
+            margin-left: 6px;
+        }
+
+        .gallery-grid:not(.collapsed) + .gallery-toggle-container .toggle-icon {
+            transform: rotate(180deg);
         }
 
         /* Location Section */
@@ -1069,7 +1111,7 @@
         <!-- Gallery Section -->
         <section>
             <h2 class="section-title fade-up">Gallery</h2>
-            <div class="gallery-grid fade-up">
+            <div class="gallery-grid fade-up collapsed" id="galleryGrid">
                 <div class="gallery-item">
                     <img src="./image/gallery_1.jpg" alt="Gallery Image 1">
                 </div>
@@ -1094,6 +1136,47 @@
                 <div class="gallery-item">
                     <img src="./image/gallery_8.jpeg" alt="Gallery Image 8">
                 </div>
+                <div class="gallery-item">
+                    <img src="./image/gallery_9.jpg" alt="Gallery Image 9">
+                </div>
+                <div class="gallery-item">
+                    <img src="./image/gallery_10.jpg" alt="Gallery Image 10">
+                </div>
+                <div class="gallery-item">
+                    <img src="./image/gallery_11.jpg" alt="Gallery Image 11">
+                </div>
+                <div class="gallery-item">
+                    <img src="./image/gallery_12.jpg" alt="Gallery Image 12">
+                </div>
+                <div class="gallery-item">
+                    <img src="./image/gallery_13.jpg" alt="Gallery Image 13">
+                </div>
+                <div class="gallery-item">
+                    <img src="./image/gallery_14.jpg" alt="Gallery Image 14">
+                </div>
+                <div class="gallery-item">
+                    <img src="./image/gallery_15.jpg" alt="Gallery Image 15">
+                </div>
+                <div class="gallery-item">
+                    <img src="./image/gallery_16.jpg" alt="Gallery Image 16">
+                </div>
+                <div class="gallery-item">
+                    <img src="./image/gallery_17.jpg" alt="Gallery Image 17">
+                </div>
+                <div class="gallery-item">
+                    <img src="./image/gallery_18.jpg" alt="Gallery Image 18">
+                </div>
+                <div class="gallery-item">
+                    <img src="./image/gallery_19.jpg" alt="Gallery Image 19">
+                </div>
+            </div>
+            <div class="gallery-toggle-container fade-up">
+                <button type="button" class="gallery-toggle-btn" id="galleryToggleBtn" onclick="toggleGallery()">
+                    <span id="galleryToggleText">사진 더보기</span>
+                    <svg class="toggle-icon" id="galleryToggleIcon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
             </div>
         </section>
 
@@ -1571,6 +1654,28 @@
             setTimeout(() => {
                 toast.classList.remove('show');
             }, 2500);
+        }
+
+        // Toggle Gallery expanded/collapsed state
+        function toggleGallery() {
+            const grid = document.getElementById('galleryGrid');
+            const btnText = document.getElementById('galleryToggleText');
+            if (!grid || !btnText) return;
+
+            const isCollapsed = grid.classList.contains('collapsed');
+            if (isCollapsed) {
+                grid.classList.remove('collapsed');
+                btnText.innerText = '사진 접기';
+            } else {
+                grid.classList.add('collapsed');
+                btnText.innerText = '사진 더보기';
+                
+                // Smooth scroll back to the gallery title so user isn't lost
+                const gallerySection = grid.closest('section');
+                if (gallerySection) {
+                    gallerySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
         }
 
         // Image Modal Logic
