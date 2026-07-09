@@ -370,7 +370,7 @@
             margin-top: 20px;
         }
 
-        .gallery-grid.collapsed .gallery-item:nth-child(n+10) {
+        .gallery-item.hidden-item {
             display: none;
         }
 
@@ -1139,35 +1139,35 @@
                 <div class="gallery-item">
                     <img src="./image/gallery_9.jpg" alt="Gallery Image 9">
                 </div>
-                <div class="gallery-item">
-                    <img src="./image/gallery_10.jpg" alt="Gallery Image 10">
+                <div class="gallery-item hidden-item">
+                    <img data-src="./image/gallery_10.jpg" alt="Gallery Image 10">
                 </div>
-                <div class="gallery-item">
-                    <img src="./image/gallery_11.jpg" alt="Gallery Image 11">
+                <div class="gallery-item hidden-item">
+                    <img data-src="./image/gallery_11.jpg" alt="Gallery Image 11">
                 </div>
-                <div class="gallery-item">
-                    <img src="./image/gallery_12.jpg" alt="Gallery Image 12">
+                <div class="gallery-item hidden-item">
+                    <img data-src="./image/gallery_12.jpg" alt="Gallery Image 12">
                 </div>
-                <div class="gallery-item">
-                    <img src="./image/gallery_13.jpg" alt="Gallery Image 13">
+                <div class="gallery-item hidden-item">
+                    <img data-src="./image/gallery_13.jpg" alt="Gallery Image 13">
                 </div>
-                <div class="gallery-item">
-                    <img src="./image/gallery_14.jpg" alt="Gallery Image 14">
+                <div class="gallery-item hidden-item">
+                    <img data-src="./image/gallery_14.jpg" alt="Gallery Image 14">
                 </div>
-                <div class="gallery-item">
-                    <img src="./image/gallery_15.jpg" alt="Gallery Image 15">
+                <div class="gallery-item hidden-item">
+                    <img data-src="./image/gallery_15.jpg" alt="Gallery Image 15">
                 </div>
-                <div class="gallery-item">
-                    <img src="./image/gallery_16.jpg" alt="Gallery Image 16">
+                <div class="gallery-item hidden-item">
+                    <img data-src="./image/gallery_16.jpg" alt="Gallery Image 16">
                 </div>
-                <div class="gallery-item">
-                    <img src="./image/gallery_17.jpg" alt="Gallery Image 17">
+                <div class="gallery-item hidden-item">
+                    <img data-src="./image/gallery_17.jpg" alt="Gallery Image 17">
                 </div>
-                <div class="gallery-item">
-                    <img src="./image/gallery_18.jpg" alt="Gallery Image 18">
+                <div class="gallery-item hidden-item">
+                    <img data-src="./image/gallery_18.jpg" alt="Gallery Image 18">
                 </div>
-                <div class="gallery-item">
-                    <img src="./image/gallery_19.jpg" alt="Gallery Image 19">
+                <div class="gallery-item hidden-item">
+                    <img data-src="./image/gallery_19.jpg" alt="Gallery Image 19">
                 </div>
             </div>
             <div class="gallery-toggle-container fade-up">
@@ -1656,17 +1656,40 @@
             }, 2500);
         }
 
-        // Toggle Gallery expanded/collapsed state
+        // Toggle Gallery expanded/collapsed state (Lazy dynamic load)
         function toggleGallery() {
             const grid = document.getElementById('galleryGrid');
             const btnText = document.getElementById('galleryToggleText');
             if (!grid || !btnText) return;
 
-            const isCollapsed = grid.classList.contains('collapsed');
-            if (isCollapsed) {
-                grid.classList.remove('collapsed');
-                btnText.innerText = '사진 접기';
+            const hiddenItems = Array.from(grid.querySelectorAll('.gallery-item.hidden-item'));
+            
+            if (hiddenItems.length > 0) {
+                // Show up to 6 more items
+                const itemsToShow = hiddenItems.slice(0, 6);
+                itemsToShow.forEach(item => {
+                    const img = item.querySelector('img');
+                    if (img && img.dataset.src) {
+                        img.src = img.dataset.src;
+                        img.removeAttribute('data-src'); // Clean up dataset once loaded
+                    }
+                    item.classList.remove('hidden-item');
+                });
+                
+                // Check if all items are now visible
+                const remainingHidden = grid.querySelectorAll('.gallery-item.hidden-item').length;
+                if (remainingHidden === 0) {
+                    grid.classList.remove('collapsed');
+                    btnText.innerText = '사진 접기';
+                }
             } else {
+                // Collapse back to original 9 items
+                const allItems = grid.querySelectorAll('.gallery-item');
+                allItems.forEach((item, index) => {
+                    if (index >= 9) {
+                        item.classList.add('hidden-item');
+                    }
+                });
                 grid.classList.add('collapsed');
                 btnText.innerText = '사진 더보기';
                 
@@ -2007,7 +2030,8 @@
             items.forEach((item, index) => {
                 const img = item.querySelector('img');
                 if (img) {
-                    galleryImages.push(img.src);
+                    const src = img.getAttribute('src') || img.getAttribute('data-src');
+                    galleryImages.push(src);
                     item.onclick = (e) => {
                         e.preventDefault();
                         openImageModal(index);
