@@ -1113,61 +1113,61 @@
             <h2 class="section-title fade-up">Gallery</h2>
             <div class="gallery-grid fade-up collapsed" id="galleryGrid">
                 <div class="gallery-item">
-                    <img src="./image/gallery_1.jpg" alt="Gallery Image 1">
+                    <img src="./image/thumbnails/gallery_1.jpg" alt="Gallery Image 1" data-full="./image/gallery_1.jpg">
                 </div>
                 <div class="gallery-item">
-                    <img src="./image/gallery_2.jpg" alt="Gallery Image 2">
+                    <img src="./image/thumbnails/gallery_2.jpg" alt="Gallery Image 2" data-full="./image/gallery_2.jpg">
                 </div>
                 <div class="gallery-item">
-                    <img src="./image/gallery_3.jpg" alt="Gallery Image 3">
+                    <img src="./image/thumbnails/gallery_3.jpg" alt="Gallery Image 3" data-full="./image/gallery_3.jpg">
                 </div>
                 <div class="gallery-item">
-                    <img src="./image/gallery_4.jpg" alt="Gallery Image 4">
+                    <img src="./image/thumbnails/gallery_4.jpg" alt="Gallery Image 4" data-full="./image/gallery_4.jpg">
                 </div>
                 <div class="gallery-item">
-                    <img src="./image/gallery_5.jpg" alt="Gallery Image 5">
+                    <img src="./image/thumbnails/gallery_5.jpg" alt="Gallery Image 5" data-full="./image/gallery_5.jpg">
                 </div>
                 <div class="gallery-item">
-                    <img src="./image/gallery_6.jpg" alt="Gallery Image 6">
+                    <img src="./image/thumbnails/gallery_6.jpg" alt="Gallery Image 6" data-full="./image/gallery_6.jpg">
                 </div>
                 <div class="gallery-item">
-                    <img src="./image/gallery_7.jpeg" alt="Gallery Image 7">
+                    <img src="./image/thumbnails/gallery_7.jpeg" alt="Gallery Image 7" data-full="./image/gallery_7.jpeg">
                 </div>
                 <div class="gallery-item">
-                    <img src="./image/gallery_8.jpeg" alt="Gallery Image 8">
+                    <img src="./image/thumbnails/gallery_8.jpeg" alt="Gallery Image 8" data-full="./image/gallery_8.jpeg">
                 </div>
                 <div class="gallery-item">
-                    <img src="./image/gallery_9.jpg" alt="Gallery Image 9">
+                    <img src="./image/thumbnails/gallery_9.jpg" alt="Gallery Image 9" data-full="./image/gallery_9.jpg">
                 </div>
                 <div class="gallery-item hidden-item">
-                    <img data-src="./image/gallery_10.jpg" alt="Gallery Image 10">
+                    <img data-src="./image/thumbnails/gallery_10.jpg" alt="Gallery Image 10" data-full="./image/gallery_10.jpg">
                 </div>
                 <div class="gallery-item hidden-item">
-                    <img data-src="./image/gallery_11.jpg" alt="Gallery Image 11">
+                    <img data-src="./image/thumbnails/gallery_11.jpg" alt="Gallery Image 11" data-full="./image/gallery_11.jpg">
                 </div>
                 <div class="gallery-item hidden-item">
-                    <img data-src="./image/gallery_12.jpg" alt="Gallery Image 12">
+                    <img data-src="./image/thumbnails/gallery_12.jpg" alt="Gallery Image 12" data-full="./image/gallery_12.jpg">
                 </div>
                 <div class="gallery-item hidden-item">
-                    <img data-src="./image/gallery_13.jpg" alt="Gallery Image 13">
+                    <img data-src="./image/thumbnails/gallery_13.jpg" alt="Gallery Image 13" data-full="./image/gallery_13.jpg">
                 </div>
                 <div class="gallery-item hidden-item">
-                    <img data-src="./image/gallery_14.jpg" alt="Gallery Image 14">
+                    <img data-src="./image/thumbnails/gallery_14.jpg" alt="Gallery Image 14" data-full="./image/gallery_14.jpg">
                 </div>
                 <div class="gallery-item hidden-item">
-                    <img data-src="./image/gallery_15.jpg" alt="Gallery Image 15">
+                    <img data-src="./image/thumbnails/gallery_15.jpg" alt="Gallery Image 15" data-full="./image/gallery_15.jpg">
                 </div>
                 <div class="gallery-item hidden-item">
-                    <img data-src="./image/gallery_16.jpg" alt="Gallery Image 16">
+                    <img data-src="./image/thumbnails/gallery_16.jpg" alt="Gallery Image 16" data-full="./image/gallery_16.jpg">
                 </div>
                 <div class="gallery-item hidden-item">
-                    <img data-src="./image/gallery_17.jpg" alt="Gallery Image 17">
+                    <img data-src="./image/thumbnails/gallery_17.jpg" alt="Gallery Image 17" data-full="./image/gallery_17.jpg">
                 </div>
                 <div class="gallery-item hidden-item">
-                    <img data-src="./image/gallery_18.jpg" alt="Gallery Image 18">
+                    <img data-src="./image/thumbnails/gallery_18.jpg" alt="Gallery Image 18" data-full="./image/gallery_18.jpg">
                 </div>
                 <div class="gallery-item hidden-item">
-                    <img data-src="./image/gallery_19.jpg" alt="Gallery Image 19">
+                    <img data-src="./image/thumbnails/gallery_19.jpg" alt="Gallery Image 19" data-full="./image/gallery_19.jpg">
                 </div>
             </div>
             <div class="gallery-toggle-container fade-up">
@@ -2030,7 +2030,7 @@
             items.forEach((item, index) => {
                 const img = item.querySelector('img');
                 if (img) {
-                    const src = img.getAttribute('src') || img.getAttribute('data-src');
+                    const src = img.getAttribute('data-full');
                     galleryImages.push(src);
                     item.onclick = (e) => {
                         e.preventDefault();
